@@ -24,9 +24,9 @@ class CourseTranslationOptions(TranslationOptions):
 
 @register(Lesson)
 class CourseTranslationOptions(TranslationOptions):
-    fields = ('title', 'content')
+    fields = ('lesson_name', 'content')
 
 
 @register(Assignment)
 class CourseTranslationOptions(TranslationOptions):
-    fields = ('title', 'description')
+    fields = ('assignment_name', 'description')

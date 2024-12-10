@@ -17,6 +17,13 @@ class LessonInline(TranslationInlineModelAdmin,admin.TabularInline):
     model = Lesson
     extra = 1
 
+class QuestionInline(admin.TabularInline):
+    model = Question
+    extra = 1
+
+class ExamAdmin(admin.ModelAdmin):
+    inlines = [QuestionInline]
+
 
 
 @admin.register(Course)
@@ -46,12 +53,7 @@ class ProductAdmin(TranslationAdmin):
         }
 
 
-class OptionInline(admin.TabularInline):
-    model = Options
-    extra = 1
 
-class QuestionAdmin(admin.ModelAdmin):
-    inlines = [OptionInline]
 
 
 
@@ -59,9 +61,8 @@ class QuestionAdmin(admin.ModelAdmin):
 admin.site.register(UserProfile)
 admin.site.register(Teacher)
 admin.site.register(Student)
-admin.site.register(Question,QuestionAdmin)
 admin.site.register(AssignmentSubmission)
-admin.site.register(Exam)
+admin.site.register(Exam, ExamAdmin)
 admin.site.register(Certificate)
 admin.site.register(Review)
 

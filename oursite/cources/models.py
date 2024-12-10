@@ -3,19 +3,41 @@ from django.contrib.auth.models import AbstractUser
 
 
 class UserProfile(AbstractUser):
+    pass
+    def __str__(self):
+        return self.username
+
+
+class Teacher(UserProfile):
+    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
+    expertise = models.CharField(max_length=255, help_text="Основная область знаний преподавателя")
+    years_of_experience = models.PositiveIntegerField(default=0, help_text="Опыт работы в годах")
+    social_links = models.JSONField(default=dict, blank=True, help_text="Ссылки на соцсети (например, LinkedIn)")
 
     def __str__(self):
         return self.username
 
 
-class Teacher(models.Model):
-    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
-    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
-    bio = models.TextField(blank=True, null=True)
 
+class Student(UserProfile):
+    student_images = models.ImageField(upload_to='student_images/', null=True, blank=True)
+    enrolled_courses = models.ManyToManyField('Course', related_name='students', blank=True)
+    grade_level = models.CharField(
+        max_length=50,
+        choices=[
+            ('beginner', 'Начальный'),
+            ('intermediate', 'Средний'),
+            ('advanced', 'Продвинутый')
+        ],
+        default='beginner',
+        help_text="Уровень подготовки студента"
+    )
+    date_of_birth = models.DateField(null=True, blank=True)
+    enrolled_courses = models.ManyToManyField('Course',related_name='enrolled_students', )
 
-class Student(models.Model):
-    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.username
 
 
 class Category(models.Model):
@@ -37,7 +59,8 @@ class Course(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='courses')
     level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='beginner')
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    created_by = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='course')
+    students = models.ManyToManyField(Student,related_name='courses_student')
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='courses_teacher')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     course_images = models.ImageField(upload_to='course_images/')
@@ -49,6 +72,8 @@ class Course(models.Model):
 
     )
     duration = models.CharField(max_length=40, choices=DURATION_CHOICES)
+    start_date = models.DateField()
+    end_date = models.DateField()
 
     def __str__(self):
         return self.course_name
@@ -56,7 +81,7 @@ class Course(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['category']),
-            models.Index(fields=['created_by']),
+            models.Index(fields=['teacher']),
             models.Index(fields=['level']),
         ]
 
@@ -77,7 +102,7 @@ class Course(models.Model):
 
 class Skills(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='skills')
-    skills = models.CharField(max_length=155, null=True, blank=True)
+    skills = models.CharField(max_length=155, null=True, blank=True, verbose_name='Навыки')
 
 
 class CourseLanguages(models.Model):
@@ -96,18 +121,18 @@ class CourseLanguages(models.Model):
 
 
 class Lesson(models.Model):
-    title = models.CharField(max_length=255)
+    lesson_name = models.CharField(max_length=255)
     video_url = models.URLField(blank=True, null=True)
     video_file = models.FileField(blank=True, null=True)
     content = models.TextField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
 
     def __str__(self):
-        return self.title
+        return self.lesson_name
 
 
 class Assignment(models.Model):
-    title = models.CharField(max_length=255)
+    assignment_name = models.CharField(max_length=255)
     description = models.TextField()
     due_date = models.DateTimeField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='assignments')
@@ -128,7 +153,7 @@ class AssignmentSubmission(models.Model):
 
 
 class Exam(models.Model):
-    title_exam = models.CharField(max_length=255)
+    exam_name = models.CharField(max_length=255)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='exams')
     passing_score = models.PositiveSmallIntegerField(choices=[(i, str(i)) for i in range(1, 101)], null=True,
                                                      blank=True,
@@ -136,28 +161,29 @@ class Exam(models.Model):
     duration = models.PositiveSmallIntegerField()
 
     def __str__(self):
-        return self.title_exam
+        return self.exam_name
 
-
+QUESTION_CHOICES_STUDENT = (
+        ('question_A', 'question_A'),
+        ('question_B', 'question_B'),
+        ('question_C', 'question_C')
+    )
 class Question(models.Model):
-    title_question = models.CharField(max_length=100)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='question')
+    question_name = models.CharField(max_length=155)
+    question_a = models.CharField(max_length=155)
+    question_b = models.CharField(max_length=155)
+    question_c = models.CharField(max_length=155)
+    question_choices_teacher = models.CharField(max_length=10, choices=QUESTION_CHOICES_STUDENT)
+    question_choices_student = models.CharField(max_length=10, choices=QUESTION_CHOICES_STUDENT)
+
 
 
     def __str__(self):
-        return self.title_question
+        return self.question_name
 
-class Options(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='options')
-    OPTION_CHOICES = (
-        ('A', 'A'),
-        ('Б', 'Б'),
-        ('В', 'В'),
-        ('Г', 'Г'),
-
-    )
-    options_choices = models.CharField(max_length=25, choices=OPTION_CHOICES)
-    options_text = models.TextField()
 
 
 class Certificate(models.Model):

@@ -29,7 +29,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['course_name', 'description', 'category', 'level' 'price', 'created_by', 'created_at', 'updated_at', 'course_images']
+        fields = ['course_name', 'description', 'category', 'level', 'price', 'teacher', 'created_at', 'updated_at', 'course_images']
 
 
 class SkillsSerializer(serializers.ModelSerializer):
@@ -47,13 +47,13 @@ class CourseLanguagesSerializer(serializers.ModelSerializer):
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
-        fields = ['title', 'video_url', 'video_file', 'content', 'course']
+        fields = ['lesson_name', 'video_url', 'video_file', 'content', 'course']
 
 
 class AssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Assignment
-        fields = ['title', 'description', 'due_date', 'course', 'students']
+        fields = ['assignment_name', 'description', 'due_date', 'course', 'students']
 
 
 class AssignmentSubmissionSerializer(serializers.ModelSerializer):
@@ -65,19 +65,13 @@ class AssignmentSubmissionSerializer(serializers.ModelSerializer):
 class ExamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exam
-        fields = ['title_exam', 'course', 'passing_score']
+        fields = ['exam_name', 'course', 'passing_score']
 
 
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = ['title_question', 'exam']
-
-
-class OptionsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Options
-        fields = ['question', 'options_choices', 'options_text']
+        fields = ['question_name', 'exam', 'question_a', 'question_b', 'question_c', 'question_choices_student']
 
 
 class CertificateSerializer(serializers.ModelSerializer):

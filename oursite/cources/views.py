@@ -70,9 +70,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionSerializer
 
 
-class OptionsViewSet(viewsets.ModelViewSet):
-    queryset = Options.objects.all()
-    serializer_class = OptionsSerializer
 
 
 class CertificateViewSet(viewsets.ModelViewSet):

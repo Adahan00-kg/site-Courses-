@@ -8,6 +8,6 @@ class CourseFilter(FilterSet):
         fields = {
             'category': ['exact'],
             'level': ['exact'],
-            'created_by': ['exact'],
+            'teacher': ['exact'],
             'duration': ['exact'],
         }
