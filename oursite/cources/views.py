@@ -137,7 +137,11 @@ class TeacherRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
         return Teacher.objects.filter(username=self.request.user)
 
 
-class CourseLanguagesViewSet(viewsets.ModelViewSet):
+class CourseLanguagesViewSet(generics.ListCreateAPIView):
+    queryset = CourseLanguages.objects.all()
+    serializer_class = CourseLanguagesSerializer
+
+class CourseLanguagesDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CourseLanguages.objects.all()
     serializer_class = CourseLanguagesSerializer
 

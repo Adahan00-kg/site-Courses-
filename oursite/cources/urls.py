@@ -31,4 +31,21 @@ urlpatterns = [
 
     # FOR TEACHER
 
+
+    path('teacher/',TeacherListAPIView.as_view(),name = 'teacher_list'),
+    path('teacher/<int:pk>/',TeacherRetrieveUpdateAPIView.as_view(),name = 'teacher_detail'),
+
+    path('course/',CourseLanguagesViewSet.as_view(),name = 'course_teacher'),
+    path('course/<int:pk>/',CourseLanguagesDetailAPIView.as_view(),name = 'course_detail'),
+
+    path('courses/',CourseTeacherListAPIView.as_view(),name = 'course_for_teacher'),
+    path('courses/<int:pk>/',CourseTeacherRetrieveAPIView.as_view(),name ='course_detail_for_detail'),
+
+    path('questions/',QuestionTeacherListCreateAPIView.as_view(),name = 'questions_teacher'),
+
+    path('exam/',ExamTeacherListCreateAPIView.as_view(),name = 'exam_list'),
+
+    path('exam/<int:pk>/',ExamTeacherRetrieveUpdateDestroyAPIView.as_view(),name = 'exam_detail')
+
+
 ]
