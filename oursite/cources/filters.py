@@ -10,4 +10,11 @@ class CourseFilter(FilterSet):
             'level': ['exact'],
             'teacher': ['exact'],
             'duration': ['exact'],
+            'skills': ['exact'],
+            'course_languages': ['exact'],
         }
+
+
+
+
+

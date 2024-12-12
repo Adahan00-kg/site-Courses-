@@ -3,32 +3,29 @@ from .models import *
 from modeltranslation.admin import TranslationAdmin, TranslationInlineModelAdmin
 
 
-
-class SkillsInline(TranslationInlineModelAdmin,admin.TabularInline):
-    model = Skills
+class OptionInline(admin.TabularInline):
+    model = Option
     extra = 1
 
 
-class CourseLanguagesInline(TranslationInlineModelAdmin,admin.TabularInline):
+class CourseLanguagesInline(TranslationInlineModelAdmin, admin.TabularInline):
     model = CourseLanguages
     extra = 1
 
-class LessonInline(TranslationInlineModelAdmin,admin.TabularInline):
+
+class LessonInline(TranslationInlineModelAdmin, admin.TabularInline):
     model = Lesson
     extra = 1
 
-class QuestionInline(admin.TabularInline):
-    model = Question
-    extra = 1
 
-class ExamAdmin(admin.ModelAdmin):
-    inlines = [QuestionInline]
-
+class QuestionAdmin(admin.ModelAdmin):
+    inlines = [OptionInline]
 
 
 @admin.register(Course)
 class CoursesAdmin(TranslationAdmin):
-    inlines = [LessonInline,CourseLanguagesInline,SkillsInline]
+    inlines = [LessonInline, CourseLanguagesInline]
+
     class Media:
         js = (
             'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
@@ -40,7 +37,7 @@ class CoursesAdmin(TranslationAdmin):
         }
 
 
-@admin.register(Category,Assignment)
+@admin.register(Category, Assignment, Skills)
 class ProductAdmin(TranslationAdmin):
     class Media:
         js = (
@@ -53,23 +50,12 @@ class ProductAdmin(TranslationAdmin):
         }
 
 
-
-
-
-
-
 admin.site.register(UserProfile)
 admin.site.register(Teacher)
 admin.site.register(Student)
 admin.site.register(AssignmentSubmission)
-admin.site.register(Exam, ExamAdmin)
+admin.site.register(Question, QuestionAdmin)
 admin.site.register(Certificate)
 admin.site.register(Review)
-
-
-
-
-
-
-
-
+admin.site.register(Exam)
+admin.site.register(Country)
