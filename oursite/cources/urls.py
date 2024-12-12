@@ -3,6 +3,9 @@ from .views import *
 
 urlpatterns = [
     # FOR STUDENT
+    path('register-student/', RegisterStudentView.as_view(), name='register-student_list'),
+    path('login-student/', CustomStudentLoginView.as_view(), name='login-student_list'),
+    path('logout-student/', LogoutStudentView.as_view(), name='logout-student_list'),
 
     path('student/', StudentListAPIView.as_view(), name='student-list'),
     path('student/<int:pk>/', StudentRetrieveUpdateAPIView.as_view(), name='student-detail'),
@@ -29,17 +32,23 @@ urlpatterns = [
 
     path('order/', OrderListCreateAPIView.as_view(), name='order-list'),
 
-    # FOR TEACHER
+    path('review/',ReviewCreateAPIView.as_view(),name='review_create'),
 
+    path('review/<int:pk>/',ReviewDeleteAPIView.as_view(),name = 'review_delete'),
+
+    # FOR TEACHER
+    path('register-teacher/', RegisterTeacherView.as_view(), name='register-teacher-list'),
+    path('login-teacher/', CustomTeachersLoginView.as_view(), name='login-teacher-list'),
+    path('logout-teacher/', LogoutTeacherView.as_view(), name='logout-teacher-list'),
 
     path('teacher/',TeacherListAPIView.as_view(),name = 'teacher_list'),
     path('teacher/<int:pk>/',TeacherRetrieveUpdateAPIView.as_view(),name = 'teacher_detail'),
 
-    path('course/',CourseLanguagesViewSet.as_view(),name = 'course_teacher'),
-    path('course/<int:pk>/',CourseLanguagesDetailAPIView.as_view(),name = 'course_detail'),
+    path('lesson/',CourseLanguagesViewSet.as_view(),name = 'course_teacher'),
+    path('lesson/<int:pk>/',CourseLanguagesDetailAPIView.as_view(),name = 'course_detail'),
 
-    path('courses/',CourseTeacherListAPIView.as_view(),name = 'course_for_teacher'),
-    path('courses/<int:pk>/',CourseTeacherRetrieveAPIView.as_view(),name ='course_detail_for_detail'),
+    path('courses_for_teacher/',CourseTeacherListAPIView.as_view(),name = 'course_for_teacher'),
+    path('courses_for_teacher/<int:pk>/',CourseTeacherRetrieveAPIView.as_view(),name ='course_detail_for_detail'),
 
     path('questions/',QuestionTeacherListCreateAPIView.as_view(),name = 'questions_teacher'),
 

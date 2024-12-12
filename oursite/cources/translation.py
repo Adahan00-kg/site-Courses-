@@ -19,7 +19,7 @@ class CourseTranslationOptions(TranslationOptions):
 
 @register(Category)
 class CourseTranslationOptions(TranslationOptions):
-    fields = ('category_name', 'description')
+    fields = ('category_name',)
 
 
 @register(Lesson)

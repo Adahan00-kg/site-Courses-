@@ -15,7 +15,7 @@ class Teacher(UserProfile):
     expertise = models.CharField(max_length=255, help_text="Основная область знаний преподавателя")
     years_of_experience = models.PositiveIntegerField(default=0, help_text="Опыт работы в годах")
     social_links = models.URLField(blank=True, help_text="Ссылки на соцсети (например, LinkedIn)")
-
+    date_registered = models.DateField(auto_now=True)
     def __str__(self):
         return self.username
 
@@ -34,6 +34,7 @@ class Student(UserProfile):
         help_text="Уровень подготовки студента"
     )
     date_of_birth = models.DateField(null=True, blank=True)
+    date_registered = models.DateField(auto_now=True)
 
     def __str__(self):
         return self.username
@@ -41,7 +42,7 @@ class Student(UserProfile):
 
 class Category(models.Model):
     category_name = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
+
 
     def __str__(self):
         return self.category_name
@@ -50,6 +51,9 @@ class Category(models.Model):
 class Skills(models.Model):
     skills = models.CharField(max_length=155, null=True, blank=True, verbose_name='Навыки')
 
+
+    def __str__(self):
+        return f'{self.skills}'
 
 class Course(models.Model):
     LEVEL_CHOICES = (
@@ -63,10 +67,10 @@ class Course(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='courses')
     level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='beginner')
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    students = models.ManyToManyField(Student, related_name='courses_student')
+    students = models.ManyToManyField(Student, related_name='courses_student',null=True,blank=True)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='courses_teacher')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateField(auto_now=True)
+    updated_at = models.DateField(auto_now=True)
     course_images = models.ImageField(upload_to='course_images/')
     DURATION_CHOICES = (
         ('Менее 2 часов', 'Менее 2 часов'),
@@ -136,7 +140,7 @@ class Assignment(models.Model):
     description = models.TextField()
     due_date = models.DateTimeField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='assignments')
-    students = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    students = models.ManyToManyField(Student)
 
     def __str__(self):
         return self.assignment_name
@@ -218,7 +222,7 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.stars} - {self.user.username}'
+        return f'{self.stars} - {self.student.username}'
 
 
 class Cart(models.Model):
@@ -247,6 +251,9 @@ class CartItem(models.Model):
 class Country(models.Model):
     country_name = models.CharField(max_length=100)
 
+
+    def __str__(self):
+        return f'{self.country_name}'
 
 class Order(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='client')

@@ -2,16 +2,78 @@ from rest_framework import serializers
 from .models import *
 
 
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
+
+class RegisterStudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = ['student_images','username', 'email', 'password', 'first_name', 'last_name', 'bio_student', 'grade_level',
+                 'date_of_birth',]
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = Student.objects.create_user(**validated_data)
+        return user
+
+
+
+
+
+class LoginStudentSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = authenticate(**data)
+        if user and user.is_active:
+            return user
+        raise serializers.ValidationError("Неверные учетные данные")
+
+    def to_representation(self, instance):
+        refresh = RefreshToken.for_user(instance)
+        return {
+            'user': {
+                'username': instance.username,
+                'email': instance.email,
+            },
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        }
+
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = '__all__'
 
+class TeacherListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Teacher
+        fields = ['username', 'profile_picture', 'years_of_experience']
+
+class StudentListSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = ['username','first_name','last_name']
 
 class StudentListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = ['username', 'student_images', 'grade_level']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    student = StudentListSimpleSerializer()
+    created_at = serializers.DateTimeField(format('%d - %m - %Y  %H:%M'))
+    class Meta:
+        model = Review
+        fields = ['student',  'stars', 'comment', 'created_at']
+
+
+class ReviewCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['id','student','stars','comment','created_at','course']
 
 
 class StudentDetailSerializer(serializers.ModelSerializer):
@@ -29,7 +91,7 @@ class SkillsSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['category_name', 'description']
+        fields = ['category_name']
 
 
 class CourseLanguagesSerializer(serializers.ModelSerializer):
@@ -48,11 +110,11 @@ class CourseStudentListSerializer(serializers.ModelSerializer):
     avg_rating = serializers.SerializerMethodField()
     total_people = serializers.SerializerMethodField()
     category = CategorySerializer()
-
+    skills = SkillsSerializer()
     class Meta:
         model = Course
-        fields = ['course_images', 'course_name', 'category', 'description', 'level', 'teacher', 'price',
-                  'avg_rating', 'total_people', 'updated_at', 'skills']
+        fields = [ 'course_name', 'course_images','category', 'level',  'price',
+                  'avg_rating', 'total_people', 'skills']
 
     def get_avg_rating(self, obj):
         return obj.get_avg_rating()
@@ -64,16 +126,17 @@ class CourseStudentListSerializer(serializers.ModelSerializer):
 class CourseStudentDetailSerializer(serializers.ModelSerializer):
     avg_rating = serializers.SerializerMethodField()
     total_people = serializers.SerializerMethodField()
-    course_languages = CourseLanguagesSerializer(read_only=True, many=True)
     category = CategorySerializer()
     skills = SkillsSerializer(read_only=True, many=True)
-    lessons = LessonStudentSerializer(read_only=True, many=True)
-
+    teacher = TeacherListSerializer()
+    created_at = serializers.DateField(format('%d - %m - %Y'))
+    updated_at = serializers.DateField(format('%d - %m - %Y'))
+    reviews = ReviewSerializer(read_only=True, many=True)
     class Meta:
         model = Course
         fields = ['course_images', 'course_name', 'category', 'description', 'teacher', 'price', 'avg_rating',
                   'total_people', 'created_at',
-                  'updated_at', 'duration', 'skills', 'lessons', 'course_languages']
+                  'updated_at', 'duration', 'skills','reviews']
 
     def get_avg_rating(self, obj):
         return obj.get_avg_rating()
@@ -162,10 +225,6 @@ class CertificateSerializer(serializers.ModelSerializer):
         fields = ['student', 'course', 'issued_at', 'certificate_url', 'certificate_file']
 
 
-class ReviewSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Review
-        fields = ['student', 'course', 'stars', 'comment', 'created_at']
 
 
 class CartItemSerializer(serializers.ModelSerializer):
@@ -208,10 +267,42 @@ class OrderSerializer(serializers.ModelSerializer):
 #For Teachers
 
 
-class TeacherListSerializer(serializers.ModelSerializer):
+class RegisterTeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher
-        fields = ['username', 'profile_picture', 'years_of_experience']
+        fields = ['profile_picture','username', 'email', 'password', 'first_name', 'last_name', 'bio', 'expertise', 'years_of_experience',
+                  'social_links']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = Teacher.objects.create_user(**validated_data)
+        return user
+
+
+
+
+
+class LoginTeacherSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = authenticate(**data)
+        if user and user.is_active:
+            return user
+        raise serializers.ValidationError("Неверные учетные данные")
+
+    def to_representation(self, instance):
+        refresh = RefreshToken.for_user(instance)
+        return {
+            'user': {
+                'username': instance.username,
+                'email': instance.email,
+            },
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        }
+
 
 
 class TeacherDetailSerializer(serializers.ModelSerializer):
@@ -244,7 +335,8 @@ class CourseTeachersDetailSerializer(serializers.ModelSerializer):
     course_languages = CourseLanguagesSerializer(read_only=True, many=True)
     category = CategorySerializer()
     skills = SkillsSerializer(read_only=True, many=True)
-
+    created_at = serializers.DateField(format('%d - %m -%Y'))
+    update_at = serializers.DateField(format('%d - %m -%Y'))
     class Meta:
         model = Course
         fields = ['teacher', 'course_images', 'course_name', 'category', 'skills', 'description', 'level', 'price',
